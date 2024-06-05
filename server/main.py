@@ -11,18 +11,21 @@ from pydantic import BaseModel
 from fastapi import FastAPI, UploadFile, Body
 from fastapi.responses import StreamingResponse
 
+
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 from TTS.utils.generic_utils import get_user_data_dir
 from TTS.utils.manage import ModelManager
+
+
 
 torch.set_num_threads(int(os.environ.get("NUM_THREADS", os.cpu_count())))
 device = torch.device("cuda" if os.environ.get("USE_CPU", "0") == "0" else "cpu")
 if not torch.cuda.is_available() and device == "cuda":
     raise RuntimeError("CUDA device unavailable, please use Dockerfile.cpu instead.") 
 
-custom_model_path = os.environ.get("CUSTOM_MODEL_PATH", "/app/tts_models")
-
+#custom_model_path = os.environ.get("CUSTOM_MODEL_PATH", "/app/tts_models")
+custom_model_path = "tts_model"
 if os.path.exists(custom_model_path) and os.path.isfile(custom_model_path + "/config.json"):
     model_path = custom_model_path
     print("Loading custom model from", model_path, flush=True)

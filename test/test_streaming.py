@@ -5,9 +5,30 @@ import subprocess
 import sys
 import time
 from typing import Iterator
-
+import os
 import requests
+import audioop
 
+server_url = os.getenv("SERVER_URL", "http://15.236.247.75:5000")
+speaker_file_path = "french_speaker3.json"
+output_file = "output_french.wav"
+text = "Mon nom est Yoann. Exploitant leurs talents uniques, quelque chose d'étonnant se produisit. commença à s'effriter."
+
+
+def convert_wav_chunk_to_ulaw_chunk(wav_chunk, sample_width=2): 
+    # The sample_width parameter corresponds to the number of bytes used per sample, default is 2 for 16-bit audio
+    
+    if sample_width not in {1, 2, 4}:
+        raise ValueError("sample_width must be 1, 2, or 4")
+        
+    # Convert the WAV audio chunk to u-Law encoding 
+    try:
+        ulaw_chunk = audioop.lin2ulaw(wav_chunk, sample_width) 
+    except audioop.error as e:
+        print(f"Error converting WAV chunk to u-Law: {e}")
+        return None
+    
+    return ulaw_chunk
 
 def is_installed(lib_name: str) -> bool:
     lib = shutil.which(lib_name)
@@ -31,6 +52,7 @@ def stream_ffplay(audio_stream, output_file, save=True):
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
         if chunk is not None:
+            chunk = convert_wav_chunk_to_ulaw_chunk(chunk)
             ffplay_proc.stdin.write(chunk)
 
     # close on finish
@@ -73,21 +95,23 @@ def get_speaker(ref_audio,server_url):
     return response.json()
 
 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--text",
-        default="It took me quite a long time to develop a voice and now that I have it I am not going to be silent.",
+        default=text,
         help="text input for TTS"
     )
     parser.add_argument(
         "--language",
-        default="en",
+        default="fr",
         help="Language to use default is 'en'  (English)"
     )
     parser.add_argument(
         "--output_file",
-        default=None,
+        default=output_file,
         help="Save TTS output to given filename"
     )
     parser.add_argument(
@@ -97,17 +121,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--server_url",
-        default="http://localhost:8000",
+        default=server_url,
         help="Server url http://localhost:8000 default, change to your server location "
     )
     parser.add_argument(
         "--stream_chunk_size",
-        default="20",
+        default="30",
         help="Stream chunk size , 20 default, reducing will get faster latency but may degrade quality"
     )
     args = parser.parse_args()
 
-    with open("./default_speaker.json", "r") as file:
+    with open(speaker_file_path, "r") as file:
         speaker = json.load(file)
 
     if args.ref_file is not None:
