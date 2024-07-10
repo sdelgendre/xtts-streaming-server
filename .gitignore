@@ -1,4 +1,7 @@
 demo_outputs
 server/tts_model
+server/Dockerfile
+server/Dockerfile.cpu
+server/Dockerfile.cuda121
 server/tts3
 server/tts4
