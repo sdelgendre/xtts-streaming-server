@@ -85,7 +85,7 @@ def postprocess(wav):
 def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannels=1):
     if (len(chunk)%sample_width*nchannels != 0):
         padding = sample_width*nchannels - len(chunk)%sample_width*nchannels
-        chunk.append(b'\x00'*padding)
+        chunk += b'\x00'*padding
     chunk_segment = AudioSegment(chunk, sample_width=sample_width,frame_rate=sample_rate,channels=nchannels)
     chunk_segment_ulaw = AudioSegment.from_file(chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"]))
     return chunk_segment_ulaw.raw_data
