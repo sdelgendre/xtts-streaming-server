@@ -134,7 +134,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         gpt_cond_latent,
         speaker_embedding,
         stream_chunk_size=stream_chunk_size,
-        enable_text_splitting=False
+        enable_text_splitting=True
     )
 
     for i, chunk in enumerate(chunks):
@@ -142,25 +142,30 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
     
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
-            yield encode_audio_common(b"", encode_base64=False)
-            yield chunk.tobytes()
+            sample_rate = 8000 if ulaw else 24000
+            sample_width = 2 if ulaw else 2
+            yield encode_audio_common(b"", encode_base64=False, sample_rate=sample_rate, sample_width=sample_width)
+            if not ulaw:
+                yield chunk.tobytes()
         else:
             if ulaw:
                 chunk = convert_wav_chunk_to_ulaw(chunk.tobytes())
-            yield chunk
+                yield chunk
+            else:
+                yield chunk.tobytes()
 
 
 @app.post("/tts_stream")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
     return StreamingResponse(
-        predict_streaming_generator(parsed_input),
+        predict_streaming_generator(parsed_input, ulaw=False),
         media_type="audio/wav",
     )
 
 @app.post("/tts_stream/ulaw")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
     return StreamingResponse(
-        predict_streaming_generator(parsed_input),
+        predict_streaming_generator(parsed_input, ulaw=True),
         media_type="audio/wav",
     )
 
