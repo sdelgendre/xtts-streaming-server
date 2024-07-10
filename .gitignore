@@ -2,3 +2,4 @@ demo_outputs
 server/tts_model
 server/tts3
 server/tts4
+test/test_outputs

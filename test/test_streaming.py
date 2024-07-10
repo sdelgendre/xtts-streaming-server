@@ -11,7 +11,7 @@ import audioop
 
 server_url = os.getenv("SERVER_URL", "http://localhost:8000")
 speaker_file_path = "french_speaker3.json"
-output_file = "output_french.wav"
+output_file = "./test_outputs/output_french.wav"
 text = "Mon nom est Yoann. Exploitant leurs talents uniques, quelque chose d'étonnant se produisit. commença à s'effriter."
 
 
