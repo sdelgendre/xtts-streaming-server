@@ -115,7 +115,7 @@ class StreamingInputs(BaseModel):
     stream_chunk_size: str = "20"
 
 
-def predict_streaming_generator(parsed_input: dict = Body(...)):
+def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = True):
     speaker_embedding = torch.tensor(parsed_input.speaker_embedding).unsqueeze(0).unsqueeze(-1)
     gpt_cond_latent = torch.tensor(parsed_input.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
@@ -136,6 +136,8 @@ def predict_streaming_generator(parsed_input: dict = Body(...)):
 
     for i, chunk in enumerate(chunks):
         chunk = postprocess(chunk)
+        if ulaw:
+            chunk = convert_wav_chunk_to_ulaw(chunk)
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             yield encode_audio_common(b"", encode_base64=False)
@@ -154,7 +156,7 @@ def predict_streaming_endpoint(parsed_input: StreamingInputs):
 @app.post("/tts_stream/ulaw")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
     return StreamingResponse(
-        convert_wav_chunk_to_ulaw(predict_streaming_generator(parsed_input)),
+        predict_streaming_generator(parsed_input),
         media_type="audio/wav",
     )
 

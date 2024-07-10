@@ -9,7 +9,7 @@ import os
 import requests
 import audioop
 
-server_url = os.getenv("SERVER_URL", "http://15.236.247.75:5000")
+server_url = os.getenv("SERVER_URL", "http://localhost:8000")
 speaker_file_path = "french_speaker3.json"
 output_file = "output_french.wav"
 text = "Mon nom est Yoann. Exploitant leurs talents uniques, quelque chose d'étonnant se produisit. commença à s'effriter."
@@ -66,7 +66,7 @@ def tts(text, speaker, language, server_url, stream_chunk_size) -> Iterator[byte
     speaker["language"] = language
     speaker["stream_chunk_size"] = stream_chunk_size  # you can reduce it to get faster response, but degrade quality
     res = requests.post(
-        f"{server_url}/tts_stream",
+        f"{server_url}/tts_stream/ulaw",
         json=speaker,
         stream=True,
     )
