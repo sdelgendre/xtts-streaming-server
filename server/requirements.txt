@@ -11,3 +11,4 @@ mecab-python3==1.0.6
 unidic-lite==1.0.8
 unidic==1.1.0
 transformers==4.33.0
+pydub

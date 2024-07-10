@@ -7,6 +7,7 @@ import torch
 import numpy as np
 from typing import List
 from pydantic import BaseModel
+from pydub import AudioSegment
 
 from fastapi import FastAPI, UploadFile, Body
 from fastapi.responses import StreamingResponse
@@ -81,6 +82,10 @@ def postprocess(wav):
     wav = (wav * 32767).astype(np.int16)
     return wav
 
+def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannels=1):
+    chunk_segment = AudioSegment(chunk, sample_width=sample_width,frame_rate=sample_rate,channels=nchannels)
+    chunk_segment_ulaw = AudioSegment.from_file(chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"]))
+    return chunk_segment_ulaw.raw_data
 
 def encode_audio_common(
     frame_input, encode_base64=True, sample_rate=24000, sample_width=2, channels=1
@@ -131,6 +136,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...)):
 
     for i, chunk in enumerate(chunks):
         chunk = postprocess(chunk)
+        # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             yield encode_audio_common(b"", encode_base64=False)
             yield chunk.tobytes()
@@ -142,6 +148,13 @@ def predict_streaming_generator(parsed_input: dict = Body(...)):
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
     return StreamingResponse(
         predict_streaming_generator(parsed_input),
+        media_type="audio/wav",
+    )
+
+@app.post("/tts_stream/ulaw")
+def predict_streaming_endpoint(parsed_input: StreamingInputs):
+    return StreamingResponse(
+        convert_wav_chunk_to_ulaw(predict_streaming_generator(parsed_input)),
         media_type="audio/wav",
     )
 
