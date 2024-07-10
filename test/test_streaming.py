@@ -52,7 +52,6 @@ def stream_ffplay(audio_stream, output_file, save=True):
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
         if chunk is not None:
-            chunk = convert_wav_chunk_to_ulaw_chunk(chunk)
             ffplay_proc.stdin.write(chunk)
 
     # close on finish
