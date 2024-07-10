@@ -136,13 +136,14 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
 
     for i, chunk in enumerate(chunks):
         chunk = postprocess(chunk)
-        if ulaw:
-            chunk = convert_wav_chunk_to_ulaw(chunk)
+    
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             yield encode_audio_common(b"", encode_base64=False)
             yield chunk.tobytes()
         else:
+            if ulaw:
+                chunk = convert_wav_chunk_to_ulaw(chunk)
             yield chunk.tobytes()
 
 
