@@ -87,6 +87,8 @@ def postprocess(wav):
     wav = (wav * 32767).astype(np.int16)
     return wav
 
+
+# TODO concatenante bytes
 def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannels=1):
     # if (len(chunk)%sample_width*nchannels != 0):
     #     padding = sample_width*nchannels - len(chunk)%sample_width*nchannels
