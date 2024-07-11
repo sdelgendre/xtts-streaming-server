@@ -54,11 +54,12 @@ def stream_ffplay(audio_stream, output_file, save=True):
     else:
         print("Saving to ", output_file)
         # ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", '-ar', '8000', output_file]
-        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", '-','-c:a', 'pcm_mulaw', '-ar', '8000', output_file]
+        ffplay_cmd = ["ffmpeg", "-probesize", "1024",'-c:a', 'pcm_mulaw', '-ar', '8000', output_file, "-i", '-']
 
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
         if chunk is not None:
+            print(chunk)
             ffplay_proc.stdin.write(chunk)
 
     # close on finish
