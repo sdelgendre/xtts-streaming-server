@@ -165,6 +165,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             # Header
+            print(create_ulaw_header(encode_base64=False))
             yield create_ulaw_header(encode_base64=False)
             # yield encode_audio_common(b"", encode_base64=False, sample_rate=8000)
             # 1st Audio Bytes
