@@ -11,8 +11,13 @@ import audioop
 
 server_url = os.getenv("SERVER_URL", "http://localhost:8000")
 speaker_file_path = "french_speaker3.json"
-output_file = "./test_outputs/output_french.wav"
+file_counter = 0
 text = "Mon nom est Yoann"
+
+output_file = "./test_outputs/output_french"
+while os.path.isfile(output_file+str(file_counter)+'.wav'):
+    file_counter += 1
+output_file = output_file+str(file_counter)+'.wav'
 
 
 def convert_wav_chunk_to_ulaw_chunk(wav_chunk, sample_width=2): 
