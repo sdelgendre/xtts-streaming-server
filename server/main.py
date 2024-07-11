@@ -89,8 +89,8 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     #     chunk += b'\x00'*padding
     buffer = io.BytesIO()
     chunk_segment = AudioSegment(chunk, sample_width=sample_width,frame_rate=sample_rate,channels=nchannels)
-    chunk_segment_ulaw = AudioSegment.from_file(chunk_segment.export(buffer,format="wav",codec='pcm_mulaw',parameters=["-ar","8000"]))
-    return chunk_segment_ulaw.raw_data
+    chunk_segment_ulaw = chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"])
+    return chunk_segment_ulaw.readlines()
 
 def encode_audio_common(
     frame_input, encode_base64=True, sample_rate=24000, sample_width=2, channels=1
