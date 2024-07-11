@@ -8,6 +8,7 @@ from typing import Iterator
 import os
 import requests
 import audioop
+from pydub import AudioSegment
 
 server_url = os.getenv("SERVER_URL", "http://localhost:8000")
 speaker_file_path = "french_speaker3.json"
@@ -70,6 +71,7 @@ def tts(text, speaker, language, server_url, stream_chunk_size) -> Iterator[byte
     speaker["text"] = text
     speaker["language"] = language
     speaker["stream_chunk_size"] = stream_chunk_size  # you can reduce it to get faster response, but degrade quality
+    speaker["add_wav_header"] = False
     res = requests.post(
         f"{server_url}/tts_stream/ulaw",
         json=speaker,
@@ -145,7 +147,7 @@ if __name__ == "__main__":
 
 
 
-    stream = tts(
+    audio_stream = tts(
             args.text,
             speaker,
             args.language,
@@ -153,9 +155,10 @@ if __name__ == "__main__":
             args.stream_chunk_size
         )
     
-    with open(args.output_file, 'wb') as f:
-        for chunk in stream:
-            if chunk is not None:
-                f.write(chunk)
-    f.close
+    
+    wav_data = AudioSegment(b'', sample_width=2, frame_rate=8000, channels=1)
+    for chunk in audio_stream:
+        wav_data+= AudioSegment(chunk, sample_width=2, frame_rate=8000, channels=1)
 
+    wav_data.export(args.outpu_file, format="wav")
+    

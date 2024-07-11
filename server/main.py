@@ -165,26 +165,13 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             # Header
-            print(create_ulaw_header(encode_base64=False))
-            yield create_ulaw_header(encode_base64=False)
-            # yield encode_audio_common(b"", encode_base64=False, sample_rate=8000)
-            # 1st Audio Bytes
+            yield encode_audio_common(b"", encode_base64=False)
+        if chunk:
             if ulaw:
                 chunk = convert_wav_chunk_to_ulaw(chunk.tobytes())
                 yield chunk
             else:
                 yield chunk.tobytes()
-        else:
-            # Audio bytes
-            yield chunk.tobytes()
-
-        # if i == 0 and add_wav_header:
-        #     # Cette ligne est importante pour la lecture du fichier
-        #     yield encode_audio_common(b"", encode_base64=False)
-        #     yield chunk.tobytes()
-        # else:
-        #     yield chunk.tobytes()
-
 
 @app.post("/tts_stream")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
