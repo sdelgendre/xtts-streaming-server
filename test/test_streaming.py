@@ -12,7 +12,7 @@ import audioop
 server_url = os.getenv("SERVER_URL", "http://localhost:8000")
 speaker_file_path = "french_speaker3.json"
 file_counter = 0
-text = "Mon nom est Yoann"
+text = "Mon nom est Yoann, et je pense que c'est vraiment sympa de manger des crêpes, vous ne trouvez pas ?"
 
 output_file = "./test_outputs/output_french"
 while os.path.isfile(output_file+str(file_counter)+'.wav'):
@@ -52,13 +52,12 @@ def stream_ffplay(audio_stream, output_file, save=True):
         ffplay_cmd = ["ffplay", "-nodisp", "-probesize", "1024", "-autoexit", "-"]
     else:
         print("Saving to ", output_file)
-        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", output_file]
+        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", output_file, '-ar', '8000']
         # ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", '-','-c:a', 'pcm_mulaw', '-ar', '8000', output_file]
 
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
         if chunk is not None:
-            print(chunk)
             ffplay_proc.stdin.write(chunk)
 
     # close on finish
