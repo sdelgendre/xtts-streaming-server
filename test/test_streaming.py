@@ -53,8 +53,8 @@ def stream_ffplay(audio_stream, output_file, save=True):
         ffplay_cmd = ["ffplay", "-nodisp", "-probesize", "1024", "-autoexit", "-"]
     else:
         print("Saving to ", output_file)
-        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", '-ar', '8000', output_file]
-        # ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", '-','-c:a', 'pcm_mulaw', '-ar', '8000', output_file]
+        # ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", '-ar', '8000', output_file]
+        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", '-','-c:a', 'pcm_mulaw', '-ar', '8000', output_file]
 
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
@@ -154,6 +154,7 @@ if __name__ == "__main__":
             args.server_url,
             args.stream_chunk_size
         )
+    stream_ffplay(audio_stream,args.output_file,bool(args.output_file))
     
     def ulaw_to_segment(segment: bytes) -> AudioSegment:
         audio_data = audioop.ulaw2lin(segment, 2)
@@ -164,5 +165,5 @@ if __name__ == "__main__":
     for chunk in audio_stream:
         wav_data += ulaw_to_segment(chunk)
 
-    wav_data.export(args.output_file, format="wav")
+    # wav_data.export(args.output_file, format="wav")
     
