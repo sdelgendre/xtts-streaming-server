@@ -160,7 +160,7 @@ if __name__ == "__main__":
         audio_data = audioop.ratecv(audio_data, 2, 1, 8000, 16000, None)[0]
         return AudioSegment(audio_data, frame_rate=16000, channels=1, sample_width=2)
 
-    wav_data = AudioSegment()
+    wav_data = AudioSegment(b'',frame_rate=16000, channels=1, sample_width=2)
 
     for chunk in audio_stream:
         wav_data += AudioSegment(chunk, sample_width=2, frame_rate=8000, channels=1)
