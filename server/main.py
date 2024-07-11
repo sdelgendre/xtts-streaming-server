@@ -97,10 +97,9 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     data = bytes(b'')
     for i,line in enumerate(chunk_segment_ulaw.readlines()):
         if i == 0:
-            data.append(bytes("b'"+line[92:]))
+            yield bytes("b'"+line[92:])
         else:
-            data.append(bytes(line))
-    return data
+            yield bytes(line)
 
 def encode_audio_common(
     frame_input, encode_base64=True, sample_rate=24000, sample_width=2, channels=1
