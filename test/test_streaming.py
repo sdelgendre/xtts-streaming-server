@@ -165,5 +165,5 @@ if __name__ == "__main__":
     for chunk in audio_stream:
         wav_data += ulaw_to_segment(chunk)
 
-    wav_data.export(args.outpu_file, format="wav")
+    wav_data.export(args.output_file, format="wav")
     
