@@ -89,7 +89,6 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     #     chunk += b'\x00'*padding
     chunk_segment = AudioSegment(chunk, sample_width=sample_width,frame_rate=sample_rate,channels=nchannels)
     chunk_segment_ulaw = AudioSegment.from_file(chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"]))
-    print(chunk_segment._data)
     return chunk_segment_ulaw.raw_data
 
 def encode_audio_common(
