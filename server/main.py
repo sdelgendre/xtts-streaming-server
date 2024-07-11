@@ -97,7 +97,7 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     
     data = chunk_segment_ulaw.readlines()
     logger.debug(data)
-    return bytes(data[0])
+    return bytes(data[1])
 
 def encode_audio_common(
     frame_input, encode_base64=True, sample_rate=24000, sample_width=2, channels=1
