@@ -163,8 +163,12 @@ if __name__ == "__main__":
 
     wav_data = AudioSegment(b'',frame_rate=16000, channels=1, sample_width=2)
     for chunk in audio_stream:
-        wav_data += ulaw_to_segment(chunk)
-    print(wav_data.raw_data)
+        wav_segment = ulaw_to_segment(chunk)
+        print('RAW DATA')
+        print(chunk)
+        print('SEGMENT DATA')
+        print(wav_data.raw_data)
+        wav_data += wav_segment
 
     # wav_data.export(args.output_file, format="wav")
     
