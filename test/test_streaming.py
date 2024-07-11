@@ -52,7 +52,7 @@ def stream_ffplay(audio_stream, output_file, save=True):
         ffplay_cmd = ["ffplay", "-nodisp", "-probesize", "1024", "-autoexit", "-"]
     else:
         print("Saving to ", output_file)
-        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", output_file, '-ar', '8000']
+        ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", "-", '-ar', '8000', output_file]
         # ffplay_cmd = ["ffmpeg", "-probesize", "1024", "-i", '-','-c:a', 'pcm_mulaw', '-ar', '8000', output_file]
 
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
