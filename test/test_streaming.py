@@ -161,7 +161,6 @@ if __name__ == "__main__":
         return AudioSegment(audio_data, frame_rate=16000, channels=1, sample_width=2)
 
     wav_data = AudioSegment(b'',frame_rate=16000, channels=1, sample_width=2)
-
     for chunk in audio_stream:
         wav_data += ulaw_to_segment(chunk)
 
