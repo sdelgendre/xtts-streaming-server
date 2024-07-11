@@ -9,6 +9,7 @@ from typing import List
 from pydantic import BaseModel
 from pydub import AudioSegment
 import ffmpeg
+import logging
 
 from fastapi import FastAPI, UploadFile, Body
 from fastapi.responses import StreamingResponse
@@ -25,6 +26,9 @@ torch.set_num_threads(int(os.environ.get("NUM_THREADS", os.cpu_count())))
 device = torch.device("cuda" if os.environ.get("USE_CPU", "0") == "0" else "cpu")
 if not torch.cuda.is_available() and device == "cuda":
     raise RuntimeError("CUDA device unavailable, please use Dockerfile.cpu instead.") 
+
+logger = logging.getLogger('uvicorn.error')
+logger.setLevel(logging.DEBUG)
 
 #custom_model_path = os.environ.get("CUSTOM_MODEL_PATH", "/app/tts_models")
 custom_model_path = "tts_model"
@@ -90,7 +94,10 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     buffer = io.BytesIO()
     chunk_segment = AudioSegment(chunk, sample_width=sample_width,frame_rate=sample_rate,channels=nchannels)
     chunk_segment_ulaw = chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"])
-    return bytes(chunk_segment_ulaw.readlines()[0])
+    
+    data = chunk_segment_ulaw.readlines()
+    logger.debug(data)
+    return bytes(data[0])
 
 def encode_audio_common(
     frame_input, encode_base64=True, sample_rate=24000, sample_width=2, channels=1
