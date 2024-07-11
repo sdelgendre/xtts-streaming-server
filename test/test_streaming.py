@@ -59,7 +59,6 @@ def stream_ffplay(audio_stream, output_file, save=True):
     ffplay_proc = subprocess.Popen(ffplay_cmd, stdin=subprocess.PIPE)
     for chunk in audio_stream:
         if chunk is not None:
-            print(chunk)
             ffplay_proc.stdin.write(chunk)
 
     # close on finish
@@ -165,6 +164,7 @@ if __name__ == "__main__":
     wav_data = AudioSegment(b'',frame_rate=16000, channels=1, sample_width=2)
     for chunk in audio_stream:
         wav_data += ulaw_to_segment(chunk)
+    print(wav_data.raw_data)
 
     # wav_data.export(args.output_file, format="wav")
     
