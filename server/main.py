@@ -121,9 +121,7 @@ def create_ulaw_header(encode_base64=False):
     # Write audio data to the pipe and read the WAV file from the output
     out, err = process.communicate(input=b'')
     wav_buf = io.BytesIO()
-    # Now `out` contains the WAV file in memory
-    with open(wav_buf, 'wb') as f:
-        f.write(out)
+    wav_buf.write(out)
     wav_buf.seek(0)
     if encode_base64:
         b64_encoded = base64.b64encode(wav_buf.getbuffer()).decode("utf-8")
