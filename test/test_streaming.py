@@ -143,6 +143,14 @@ if __name__ == "__main__":
         print("Computing the latents for a new reference...")
         speaker = get_speaker(args.ref_file, args.server_url)
 
+    stream = tts(
+            args.text,
+            speaker,
+            args.language,
+            args.server_url,
+            args.stream_chunk_size
+        )
+
     audio = stream_ffplay(
         tts(
             args.text,

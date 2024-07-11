@@ -8,6 +8,7 @@ import numpy as np
 from typing import List
 from pydantic import BaseModel
 from pydub import AudioSegment
+import ffmpeg
 
 from fastapi import FastAPI, UploadFile, Body
 from fastapi.responses import StreamingResponse
@@ -100,6 +101,7 @@ def encode_audio_common(
         vfout.setsampwidth(sample_width)
         vfout.setframerate(sample_rate)
         vfout.writeframes(frame_input)
+    
 
     wav_buf.seek(0)
     if encode_base64:
@@ -107,6 +109,28 @@ def encode_audio_common(
         return b64_encoded
     else:
         return wav_buf.read()
+    
+def create_ulaw_header(encode_base64=False):
+    process = (
+        ffmpeg
+        .input('pipe:0', format='s16le', ac=1, ar=24000)
+        .output('pipe:1', acodec='pcm_mulaw', ar=8000)
+        .run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
+    )
+
+    # Write audio data to the pipe and read the WAV file from the output
+    out, err = process.communicate(input=b'')
+    wav_buf = io.BytesIO()
+    # Now `out` contains the WAV file in memory
+    with open(wav_buf, 'wb') as f:
+        f.write(out)
+    wav_buf.seek(0)
+    if encode_base64:
+        b64_encoded = base64.b64encode(wav_buf.getbuffer()).decode("utf-8")
+        return b64_encoded
+    else:
+        return wav_buf.read()
+    
 
 
 class StreamingInputs(BaseModel):
@@ -143,15 +167,16 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         # Création du header si on est au premier chunk
         if i == 0 and add_wav_header:
             # Header
-            yield encode_audio_common(b"", encode_base64=False, sample_rate=8000)
-            print(chunk.tobytes())
-            # Audio Bytes
+            yield create_ulaw_header(encode_base64=False)
+            # yield encode_audio_common(b"", encode_base64=False, sample_rate=8000)
+            # 1st Audio Bytes
             if ulaw:
                 chunk = convert_wav_chunk_to_ulaw(chunk.tobytes())
                 yield chunk
             else:
                 yield chunk.tobytes()
         else:
+            # Audio bytes
             yield chunk.tobytes()
 
         # if i == 0 and add_wav_header:
