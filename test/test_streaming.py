@@ -155,10 +155,15 @@ if __name__ == "__main__":
             args.stream_chunk_size
         )
     
-    
-    wav_data = AudioSegment(b'', sample_width=2, frame_rate=8000, channels=1)
+    def ulaw_to_segment(segment: bytes) -> AudioSegment:
+        audio_data = audioop.ulaw2lin(segment, 2)
+        audio_data = audioop.ratecv(audio_data, 2, 1, 8000, 16000, None)[0]
+        return AudioSegment(audio_data, frame_rate=16000, channels=1, sample_width=2)
+
+    wav_data = AudioSegment()
+
     for chunk in audio_stream:
-        wav_data+= AudioSegment(chunk, sample_width=2, frame_rate=8000, channels=1)
+        wav_data += AudioSegment(chunk, sample_width=2, frame_rate=8000, channels=1)
 
     wav_data.export(args.outpu_file, format="wav")
     
