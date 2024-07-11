@@ -154,7 +154,7 @@ if __name__ == "__main__":
             args.server_url,
             args.stream_chunk_size
         )
-    stream_ffplay(audio_stream,args.output_file,bool(args.output_file))
+    # stream_ffplay(audio_stream,args.output_file,bool(args.output_file))
     
     def ulaw_to_segment(segment: bytes) -> AudioSegment:
         audio_data = audioop.ulaw2lin(segment, 2)
