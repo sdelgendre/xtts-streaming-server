@@ -96,6 +96,7 @@ def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannel
     chunk_segment_ulaw = chunk_segment.export(format="wav",codec='pcm_mulaw',parameters=["-ar","8000"])
     data = ''
     for i,line in enumerate(chunk_segment_ulaw.readlines()):
+        logger.debug(line[87:])
         if i == 0:
             data += "b'"+line[92:]
         else:
