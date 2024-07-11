@@ -153,7 +153,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         #         yield chunk.tobytes()
 
         if i == 0 and add_wav_header:
-            yield encode_audio_common(b"", encode_base64=False)
+            # yield encode_audio_common(b"", encode_base64=False)
             yield chunk.tobytes()
         else:
             yield chunk.tobytes()
