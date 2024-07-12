@@ -149,7 +149,7 @@ class StreamingInputs(BaseModel):
     gpt_cond_latent: List[List[float]]
     text: str
     language: str
-    add_wav_header: bool = True
+    add_wav_header: bool = False
     stream_chunk_size: str = "20"
 
 
@@ -176,9 +176,9 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         chunk = postprocess(chunk)
     
         # Création du header si on est au premier chunk
-        # if i == 0 and add_wav_header:
-        #     # Header
-        #     yield encode_audio_common(b"", encode_base64=False)
+        if i == 0 and add_wav_header:
+            # Header
+            yield encode_audio_common(b"", encode_base64=False)
         if chunk is not None:
             if ulaw:
                 chunk = convert_wav_chunk_to_ulaw(chunk.tobytes())
@@ -204,6 +204,7 @@ class TTSInputs(BaseModel):
     speaker_embedding: List[float]
     gpt_cond_latent: List[List[float]]
     text: str
+    add_wav_header: bool = False
     language: str
 
 @app.post("/tts")
@@ -212,6 +213,7 @@ def predict_speech(parsed_input: TTSInputs):
     gpt_cond_latent = torch.tensor(parsed_input.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
     language = parsed_input.language
+    add_wav_header = parsed_input.add_wav_header
 
     out = model.inference(
         text,
@@ -221,8 +223,10 @@ def predict_speech(parsed_input: TTSInputs):
     )
 
     wav = postprocess(torch.tensor(out["wav"]))
-
-    return encode_audio_common(wav.tobytes())
+    if add_wav_header:
+        return encode_audio_common(wav.tobytes())
+    else:
+        return wav.tobytes()
 
 
 @app.get("/studio_speakers")
