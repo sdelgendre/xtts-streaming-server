@@ -79,6 +79,21 @@ def predict_speaker(wav_file: UploadFile):
         "speaker_embedding": speaker_embedding.cpu().squeeze().half().tolist(),
     }
 
+@app.post("/add_speaker")
+def add_new_speaker(wav_file : UploadFile, voice_id: str):
+    """
+    Clone a voice and save the voice embedding in a json file. Returns 
+    """
+    speaker = predict_speaker(wav_file=wav_file)
+    voice_path = os.path.join('voices', voice_id)
+    path_counter = 0
+    while os.path.exists(voice_path+'.json'):
+        voice_path+=str(path_counter)
+        path_counter += 1
+    voice_path += '.json'
+    with open(voice_path) as speaker_file:
+        json.dump(speaker,speaker_file)
+    return voice_path.strip('/')[1].strip('.')[0]
 
 def postprocess(wav):
     """Post process the output waveform"""
@@ -175,7 +190,8 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         print("Speaker file not found, using default voice")
         voice_path = 'voices/default_speaker.json'
 
-    speaker = json.load(voice_path)
+    with os.open(voice_path) as speaker_file:
+        speaker = json.load(speaker_file)
     speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
     gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
@@ -247,8 +263,9 @@ def predict_speech(parsed_input: TTSInputs):
     if not os.path.exists(voice_path):
         print("Speaker file not found, using default voice")
         voice_path = 'voices/default_speaker.json'
-
-    speaker = json.load(voice_path)
+    
+    with os.open(voice_path) as speaker_file:
+        speaker = json.load(speaker_file)
     speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
     gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
