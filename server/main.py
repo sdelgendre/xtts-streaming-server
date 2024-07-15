@@ -33,7 +33,7 @@ logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
 # Loading custom model
-custom_model_path = "tts_model"
+custom_model_path = "tts_model/"
 if os.path.exists(custom_model_path) and os.path.isfile(custom_model_path + "/config.json"):
     model_path = custom_model_path
     print("Loading custom model from", model_path, flush=True)
@@ -186,11 +186,9 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
     """
     voice_id = parsed_input.voice_id
     voice_path = os.path.join('voices',voice_id+'.json')
-    print(os.listdir(os.path.curdir))
-
     if not os.path.exists(voice_path):
         print("Speaker file not found, using default voice")
-        voice_path = './voices/default_speaker.json'
+        voice_path = 'voices/default_speaker.json'
 
     with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
@@ -265,7 +263,7 @@ def predict_speech(parsed_input: TTSInputs):
     voice_path = os.path.join('voices',voice_id+'.json')
     if not os.path.exists(voice_path):
         print("Speaker file not found, using default voice")
-        voice_path = './voices/default_speaker.json'
+        voice_path = 'voices/default_speaker.json'
     
     with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
