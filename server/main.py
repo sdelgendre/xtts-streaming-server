@@ -192,8 +192,8 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
 
     with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
-    speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
-    gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
+    speaker_embedding = torch.tensor(speaker['speaker_embedding']).unsqueeze(0).unsqueeze(-1)
+    gpt_cond_latent = torch.tensor(speaker["gpt_cond_latent"]).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
     language = parsed_input.language
 
@@ -267,8 +267,8 @@ def predict_speech(parsed_input: TTSInputs):
     
     with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
-    speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
-    gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
+    speaker_embedding = torch.tensor(speaker["speaker_embedding"]).unsqueeze(0).unsqueeze(-1)
+    gpt_cond_latent = torch.tensor(speaker["gpt_cond_latent"]).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
     language = parsed_input.language
     add_wav_header = parsed_input.add_wav_header
