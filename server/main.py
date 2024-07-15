@@ -258,3 +258,17 @@ def get_speakers():
 @app.get("/languages")
 def get_languages():
     return config.languages
+
+
+@app.get("/get_voice_ids")
+def get_voice_ids():
+    try:
+        # List all files and directories in the specified directory
+        entries = os.listdir('voices')
+        # Filter out directories, keeping only json files, return only the name
+        files = [entry.split('.')[0] for entry in entries if os.path.isfile(os.path.join('voices', entry)) and entry.split('.')[1] == 'json']
+        
+        return files
+    except Exception as e:
+        print(f"An error occurred while checking voice ids: {e}")
+        return []
