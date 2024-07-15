@@ -190,7 +190,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         print("Speaker file not found, using default voice")
         voice_path = 'voices/default_speaker.json'
 
-    with os.open(voice_path, 'r') as speaker_file:
+    with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
     speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
     gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
@@ -264,7 +264,7 @@ def predict_speech(parsed_input: TTSInputs):
         print("Speaker file not found, using default voice")
         voice_path = 'voices/default_speaker.json'
     
-    with os.open(voice_path,'r') as speaker_file:
+    with open(voice_path,'r') as speaker_file:
         speaker = json.load(speaker_file)
     speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
     gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
