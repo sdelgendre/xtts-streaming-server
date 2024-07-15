@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from pydub import AudioSegment
 import ffmpeg
 import logging
+import json
 
 from fastapi import FastAPI, UploadFile, Body
 from fastapi.responses import StreamingResponse
@@ -145,8 +146,7 @@ def create_ulaw_header(encode_base64=False):
     
 
 class StreamingInputs(BaseModel):
-    speaker_embedding: List[float]
-    gpt_cond_latent: List[List[float]]
+    voice_id : str = 'default_speaker'
     text: str
     language: str
     add_wav_header: bool = False
@@ -154,8 +154,15 @@ class StreamingInputs(BaseModel):
 
 
 def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = True):
-    speaker_embedding = torch.tensor(parsed_input.speaker_embedding).unsqueeze(0).unsqueeze(-1)
-    gpt_cond_latent = torch.tensor(parsed_input.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
+    voice_id = parsed_input.voice_id
+    voice_path = os.path.join('voices',voice_id+'.json')
+    if not os.path.exists(voice_path):
+        print("Speaker file not found, using default voice")
+        voice_path = 'voices/default_speaker.json'
+
+    speaker = json.load(voice_path)
+    speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
+    gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
     language = parsed_input.language
 
@@ -201,16 +208,22 @@ def predict_streaming_endpoint(parsed_input: StreamingInputs):
     )
 
 class TTSInputs(BaseModel):
-    speaker_embedding: List[float]
-    gpt_cond_latent: List[List[float]]
+    voice_id : str = 'default_speaker'
     text: str
     add_wav_header: bool = False
     language: str
 
 @app.post("/tts")
 def predict_speech(parsed_input: TTSInputs):
-    speaker_embedding = torch.tensor(parsed_input.speaker_embedding).unsqueeze(0).unsqueeze(-1)
-    gpt_cond_latent = torch.tensor(parsed_input.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
+    voice_id = parsed_input.voice_id
+    voice_path = os.path.join('voices',voice_id+'.json')
+    if not os.path.exists(voice_path):
+        print("Speaker file not found, using default voice")
+        voice_path = 'voices/default_speaker.json'
+
+    speaker = json.load(voice_path)
+    speaker_embedding = torch.tensor(speaker.speaker_embedding).unsqueeze(0).unsqueeze(-1)
+    gpt_cond_latent = torch.tensor(speaker.gpt_cond_latent).reshape((-1, 1024)).unsqueeze(0)
     text = parsed_input.text
     language = parsed_input.language
     add_wav_header = parsed_input.add_wav_header
