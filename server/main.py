@@ -186,7 +186,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
     """
     voice_id = parsed_input.voice_id
     voice_path = os.path.join('voices',voice_id+'.json')
-    print(os.curdir)
+    print(os.path.curdir)
 
     if not os.path.exists(voice_path):
         print("Speaker file not found, using default voice")
