@@ -22,16 +22,17 @@ from TTS.utils.generic_utils import get_user_data_dir
 from TTS.utils.manage import ModelManager
 
 
-
+# Setting up torch and device
 torch.set_num_threads(int(os.environ.get("NUM_THREADS", os.cpu_count())))
 device = torch.device("cuda" if os.environ.get("USE_CPU", "0") == "0" else "cpu")
 if not torch.cuda.is_available() and device == "cuda":
     raise RuntimeError("CUDA device unavailable, please use Dockerfile.cpu instead.") 
 
+# Setting up logger for debug purposes (logger.debug(message))
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
-#custom_model_path = os.environ.get("CUSTOM_MODEL_PATH", "/app/tts_models")
+# Loading custom model
 custom_model_path = "tts_model"
 if os.path.exists(custom_model_path) and os.path.isfile(custom_model_path + "/config.json"):
     model_path = custom_model_path
@@ -44,6 +45,7 @@ else:
     model_path = os.path.join(get_user_data_dir("tts"), model_name.replace("/", "--"))
     print("XTTS Model downloaded", flush=True)
 
+# Loading configuration
 print("Loading XTTS", flush=True)
 config = XttsConfig()
 config.load_json(os.path.join(model_path, "config.json"))
@@ -91,6 +93,10 @@ def postprocess(wav):
 
 # TODO concatenante bytes
 def convert_wav_chunk_to_ulaw(chunk, sample_rate=24000, sample_width=2, nchannels=1):
+    """
+    Convert wav bytes chunk to ulaw bytes chunk
+    TODO : FINISH METHOD IMPLEMENTATION
+    """
     # if (len(chunk)%sample_width*nchannels != 0):
     #     padding = sample_width*nchannels - len(chunk)%sample_width*nchannels
     #     chunk += b'\x00'*padding
@@ -126,6 +132,9 @@ def encode_audio_common(
         return wav_buf.read()
     
 def create_ulaw_header(encode_base64=False):
+    """
+    Generate ulaw encoding header for ulaw-encoded wav files
+    """
     process = (
         ffmpeg
         .input('pipe:0', format='s16le', ac=1, ar=24000)
@@ -146,6 +155,9 @@ def create_ulaw_header(encode_base64=False):
     
 
 class StreamingInputs(BaseModel):
+    """
+    Utility class for stream inputs
+    """
     voice_id : str = 'default_speaker'
     text: str
     language: str
@@ -154,6 +166,9 @@ class StreamingInputs(BaseModel):
 
 
 def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = True):
+    """
+    Generate stream chunk generator for tts streaming
+    """
     voice_id = parsed_input.voice_id
     voice_path = os.path.join('voices',voice_id+'.json')
     if not os.path.exists(voice_path):
@@ -195,6 +210,9 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
 
 @app.post("/tts_stream")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
+    """
+    Create stream tts endpoint
+    """
     return StreamingResponse(
         predict_streaming_generator(parsed_input, ulaw=False),
         media_type="audio/wav",
@@ -202,12 +220,18 @@ def predict_streaming_endpoint(parsed_input: StreamingInputs):
 
 @app.post("/tts_stream/ulaw")
 def predict_streaming_endpoint(parsed_input: StreamingInputs):
+    """
+    Create stream tts endpoint with ulaw conversion
+    """
     return StreamingResponse(
         predict_streaming_generator(parsed_input, ulaw=True),
         media_type="audio/wav",
     )
 
 class TTSInputs(BaseModel):
+    """
+    Utility class for TTS inputs
+    """
     voice_id : str = 'default_speaker'
     text: str
     add_wav_header: bool = False
@@ -215,6 +239,9 @@ class TTSInputs(BaseModel):
 
 @app.post("/tts")
 def predict_speech(parsed_input: TTSInputs):
+    """
+    Generate tts speech
+    """
     voice_id = parsed_input.voice_id
     voice_path = os.path.join('voices',voice_id+'.json')
     if not os.path.exists(voice_path):
@@ -244,6 +271,9 @@ def predict_speech(parsed_input: TTSInputs):
 
 @app.get("/studio_speakers")
 def get_speakers():
+    """
+    Return speakers managed by the model manager
+    """
     if hasattr(model, "speaker_manager") and hasattr(model.speaker_manager, "speakers"):
         return {
             speaker: {
@@ -257,11 +287,17 @@ def get_speakers():
         
 @app.get("/languages")
 def get_languages():
+    """
+    Return languages supported by the model
+    """
     return config.languages
 
 
 @app.get("/get_voice_ids")
 def get_voice_ids():
+    """
+    Return voice available in the voice folder
+    """
     try:
         # List all files and directories in the specified directory
         entries = os.listdir('voices')
