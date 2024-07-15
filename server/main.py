@@ -216,7 +216,7 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         # Création du header si on est au premier chunk
         if chunk is not None:
             if add_wav_header:
-                chunk_with_header = encode_audio_common(chunk, encode_base64=False)
+                chunk_with_header = encode_audio_common(chunk.tobytes(), encode_base64=False)
                 yield chunk_with_header
             else:
                 yield chunk.tobytes()
