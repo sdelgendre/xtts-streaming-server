@@ -291,6 +291,7 @@ def predict_speech(parsed_input: TTSInputs):
     )
 
     wav = postprocess(torch.tensor(out["wav"]))
+    print(wav)
     if add_wav_header:
         return encode_audio_common(wav.tobytes())
     else:
