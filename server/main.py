@@ -270,7 +270,6 @@ def predict_speech(parsed_input: TTSInputs):
     Generate tts speech
     """
     voice_id = parsed_input.voice_id
-    print(os.curdir)
     voice_path = os.path.join('voices',voice_id+'.json')
     if not os.path.exists(voice_path):
         print("Speaker file not found, using default voice")
