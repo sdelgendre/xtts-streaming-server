@@ -33,7 +33,7 @@ logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
 # Loading custom model
-custom_model_path = "tts_model/"
+custom_model_path = "tts_model"
 if os.path.exists(custom_model_path) and os.path.isfile(custom_model_path + "/config.json"):
     model_path = custom_model_path
     print("Loading custom model from", model_path, flush=True)
@@ -216,7 +216,9 @@ def predict_streaming_generator(parsed_input: dict = Body(...), ulaw : bool = Tr
         # Création du header si on est au premier chunk
         if chunk is not None:
             if add_wav_header:
-                chunk_with_header = encode_audio_common(chunk.tobytes(), encode_base64=False)
+                header = b'RIFF\x00\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\xc0\x5d\x00\x00\x80\xbb\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00'
+                chunk_with_header = bytes(header + chunk)
+                # chunk_with_header = encode_audio_common(chunk.tobytes(), encode_base64=False)
                 yield chunk_with_header
             else:
                 yield chunk.tobytes()
