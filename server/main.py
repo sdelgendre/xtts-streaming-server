@@ -295,7 +295,7 @@ def predict_speech(parsed_input: TTSInputs):
     if add_wav_header:
         return encode_audio_common(wav.tobytes())
     else:
-        return wav.tobytes()
+        return {'content':wav.tobytes()}
 
 
 @app.get("/studio_speakers")
